@@ -1,12 +1,17 @@
-
 import React from 'react';
+
+type ChunkSize = 1 | 2 | 3 | 4 | 5;
+
+// Klemmt einen number wieder sauber auf die Union 1|2|3|4|5
+const clampChunk = (n: number): ChunkSize =>
+  Math.max(1, Math.min(5, Math.round(n))) as ChunkSize;
 
 export default function ControlsBar(
   { playing, onToggle, wpm, setWpm, chunk, setChunk, onBack, onFwd, remainingMs, onExit }:
   {
     playing: boolean; onToggle: ()=>void;
     wpm: number; setWpm: (n:number)=>void;
-    chunk: 1|2|3|4|5; setChunk: (c:1|2|3|4|5)=>void;
+    chunk: ChunkSize; setChunk: (c: ChunkSize)=>void;
     onBack: ()=>void; onFwd: ()=>void;
     remainingMs: number;
     onExit: ()=>void;
@@ -26,9 +31,9 @@ export default function ControlsBar(
         <button onClick={()=>setWpm(Math.min(1000, wpm+25))}>+</button>
 
         <span style={{ marginLeft: 12 }}>Chunk</span>
-        <button onClick={()=>setChunk(Math.max(1, (chunk-1) as any))}>−</button>
+        <button onClick={()=>setChunk(clampChunk(chunk - 1))}>−</button>
         <strong>{chunk}</strong>
-        <button onClick={()=>setChunk(Math.min(5, (chunk+1) as any))}>+</button>
+        <button onClick={()=>setChunk(clampChunk(chunk + 1))}>+</button>
 
         <span style={{ marginLeft: 12 }}>Remaining: {rem}</span>
 
