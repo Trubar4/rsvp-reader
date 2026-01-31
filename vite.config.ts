@@ -2,6 +2,5 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
-  base: '' // Vercel (Root-Deploy) -> leer lassen
+  plugins: [react()],   // wichtig für React & Fast Refresh
 });
