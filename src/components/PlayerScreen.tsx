@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from 'react';
 import { buildChunks } from '../lib/timing';
 import FocalWord from './FocalWord';
@@ -7,18 +6,21 @@ import { useKeyControls } from '../hooks/useKeyControls';
 
 type Token = {
   text: string;
-  type: 'word'|'punct'|'paragraph_break';
+  type: 'word' | 'punct' | 'paragraph_break';
 };
 
 export default function PlayerScreen(
-  { tokens, lang, wpm, chunk, textScale, fg, bg, onExit, onUpdate } :
+  { tokens, lang, wpm, chunk, textScale, fg, bg, onExit, onUpdate }:
   {
     tokens: Token[];
-    lang: 'en'|'de';
-    wpm: number; chunk: 1|2|3|4|5;
-    textScale: number; fg: string; bg: string;
-    onExit: ()=>void;
-    onUpdate: (s:{wpm:number;chunk:1|2|3|4|5})=>void;
+    lang: 'en' | 'de';
+    wpm: number;
+    chunk: 1 | 2 | 3 | 4 | 5;
+    textScale: number;
+    fg: string;
+    bg: string;
+    onExit: () => void;
+    onUpdate: (s: { wpm: number; chunk: 1 | 2 | 3 | 4 | 5 }) => void;
   }
 ) {
   const [pos, setPos] = useState(0);
@@ -34,7 +36,7 @@ export default function PlayerScreen(
       if (pos >= chunks.length - 1) { setPlaying(false); return; }
       handle = window.setTimeout(() => {
         setPos(p => p + 1);
-        setStats(s => ({ ...s, wordsShown: s.wordsShown + chunks[Math.min(pos, chunks.length-1)].wordCount }));
+        setStats(s => ({ ...s, wordsShown: s.wordsShown + chunks[Math.min(pos, chunks.length - 1)].wordCount }));
         raf = requestAnimationFrame(run);
       }, chunks[pos].delayMs);
     };
@@ -63,8 +65,8 @@ export default function PlayerScreen(
   }
 
   const current = chunks[pos];
-  const progress = (chunks.slice(0, pos).reduce((a,c)=>a+c.delayMs,0) / totalMs) * 100;
-  const remainingMs = Math.max(0, totalMs - chunks.slice(0, pos).reduce((a,c)=>a+c.delayMs,0));
+  const progress = (chunks.slice(0, pos).reduce((a, c) => a + c.delayMs, 0) / totalMs) * 100;
+  const remainingMs = Math.max(0, totalMs - chunks.slice(0, pos).reduce((a, c) => a + c.delayMs, 0));
 
   function onTap(e: React.MouseEvent) {
     const x = e.clientX;
@@ -88,21 +90,34 @@ export default function PlayerScreen(
       </div>
 
       <div>
-        <div className="progress" onClick={(e)=> {
-          const rect = (e.target as HTMLDivElement).getBoundingClientRect();
-          const ratio = (e.clientX - rect.left) / rect.width;
-          const target = ratio * totalMs;
-          let sum = 0, idx = 0;
-          for (let i = 0; i < chunks.length; i++) { if (sum >= target) { idx = i; break; } sum += chunks[i].delayMs; idx = i; }
-          setPos(idx);
-        }}>
-          <div style={{ width: `${progress}%` }} />
+        <div className="progress-container">
+          <div
+            className="progress"
+            onClick={(e) => {
+              const rect = (e.target as HTMLDivElement).getBoundingClientRect();
+              const ratio = (e.clientX - rect.left) / rect.width;
+              const target = ratio * totalMs;
+              let sum = 0, idx = 0;
+              for (let i = 0; i < chunks.length; i++) {
+                if (sum >= target) { idx = i; break; }
+                sum += chunks[i].delayMs;
+                idx = i;
+              }
+              setPos(idx);
+            }}
+          >
+            <div style={{ width: `${progress}%` }} />
+          </div>
         </div>
         <ControlsBar
-          playing={playing} onToggle={()=>setPlaying(p=>!p)}
-          wpm={wpm} setWpm={(n)=>onUpdate({ wpm:n, chunk })}
-          chunk={chunk} setChunk={(c)=>onUpdate({ wpm, chunk:c })}
-          onBack={()=>seekByMs(-3000)} onFwd={()=>seekByMs(+1000)}
+          playing={playing}
+          onToggle={() => setPlaying(p => !p)}
+          wpm={wpm}
+          setWpm={(n) => onUpdate({ wpm: n, chunk })}
+          chunk={chunk}
+          setChunk={(c) => onUpdate({ wpm, chunk: c })}
+          onBack={() => seekByMs(-3000)}
+          onFwd={() => seekByMs(+1000)}
           remainingMs={remainingMs}
           onExit={onExit}
         />
