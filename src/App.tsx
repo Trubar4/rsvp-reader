@@ -16,6 +16,13 @@ function loadSettings() {
   return null;
 }
 
+// Generiert die korrekte Bookmarklet-URL (funktioniert auch mit Subdirectory wie /rsvp-reader/)
+function getBookmarkletBaseUrl() {
+  // Nimmt die aktuelle URL und ersetzt den Dateinamen mit bookmarklet.js
+  const url = new URL('bookmarklet.js', window.location.href);
+  return url.href.split('?')[0]; // Entferne Query-Parameter falls vorhanden
+}
+
 export default function App() {
   const saved = loadSettings();
 
@@ -27,6 +34,10 @@ export default function App() {
   const [fg, setFg] = useState(saved?.fg || '#1a1a2e');
   const [bg, setBg] = useState(saved?.bg || '#f8f9fa');
   const [playing, setPlaying] = useState(false);
+
+  // Bookmarklet URL mit aktuellen Einstellungen
+  const bookmarkletUrl = `${getBookmarkletBaseUrl()}?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`;
+  const bookmarkletCode = `javascript:(function(){var s=document.createElement('script');s.src='${bookmarkletUrl}&t='+Date.now();document.body.appendChild(s)})()`;
 
   // Speichere Einstellungen bei Änderungen
   useEffect(() => {
@@ -78,7 +89,7 @@ export default function App() {
         </p>
         <a
           className="bookmarklet-link"
-          href={`javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&t='+Date.now();document.body.appendChild(s)})()`}
+          href={bookmarkletCode}
           onClick={(e) => { e.preventDefault(); alert('Ziehe diesen Button in deine Lesezeichen-Leiste!\n\niPhone: Nutze den "Code kopieren" Button unten.'); }}
         >
           Speed Read ({wpm} WPM)
@@ -99,11 +110,10 @@ export default function App() {
             className="btn btn-secondary"
             style={{ width: '100%', background: 'white', color: '#4361ee' }}
             onClick={() => {
-              const code = `javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&t='+Date.now();document.body.appendChild(s)})()`;
-              navigator.clipboard.writeText(code).then(() => {
+              navigator.clipboard.writeText(bookmarkletCode).then(() => {
                 alert('✓ Bookmarklet-Code kopiert!\n\nJetzt ein Lesezeichen erstellen und die URL durch diesen Code ersetzen.');
               }).catch(() => {
-                prompt('Kopiere diesen Code manuell:', code);
+                prompt('Kopiere diesen Code manuell:', bookmarkletCode);
               });
             }}
           >
