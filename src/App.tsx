@@ -74,21 +74,41 @@ export default function App() {
       <div className="bookmarklet-section">
         <h2 style={{ margin: '0 0 12px 0' }}>Speed Reading Bookmarklet</h2>
         <p style={{ margin: '0 0 20px 0', opacity: 0.9 }}>
-          Ziehe diesen Button in deine Lesezeichen-Leiste:
+          <strong>Desktop:</strong> Ziehe den Button in deine Lesezeichen-Leiste
         </p>
         <a
           className="bookmarklet-link"
           href={`javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&t='+Date.now();document.body.appendChild(s)})()`}
-          onClick={(e) => { e.preventDefault(); alert('Ziehe diesen Button in deine Lesezeichen-Leiste!'); }}
+          onClick={(e) => { e.preventDefault(); alert('Ziehe diesen Button in deine Lesezeichen-Leiste!\n\niPhone: Nutze den "Code kopieren" Button unten.'); }}
         >
           Speed Read ({wpm} WPM)
         </a>
-        <div className="bookmarklet-instructions">
-          <strong>Anleitung:</strong><br/>
-          1. Stelle unten deine gewünschten Einstellungen ein<br/>
-          2. Ziehe den Button oben in deine Lesezeichen-Leiste<br/>
-          3. Gehe auf eine beliebige Webseite, markiere optional Text<br/>
-          4. Klicke auf das Bookmarklet → Speed Reading mit deinen Einstellungen
+
+        {/* iOS Anleitung */}
+        <div style={{ marginTop: 20, padding: 16, background: 'rgba(255,255,255,0.15)', borderRadius: 12 }}>
+          <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem' }}>
+            <strong>📱 iPhone/iPad:</strong>
+          </p>
+          <ol style={{ margin: '0 0 12px 0', paddingLeft: 20, fontSize: '0.85rem', opacity: 0.9 }}>
+            <li>Tippe unten auf "Code kopieren"</li>
+            <li>Erstelle ein Lesezeichen (Teilen → Lesezeichen)</li>
+            <li>Bearbeite das Lesezeichen</li>
+            <li>Ersetze die URL durch den kopierten Code</li>
+          </ol>
+          <button
+            className="btn btn-secondary"
+            style={{ width: '100%', background: 'white', color: '#4361ee' }}
+            onClick={() => {
+              const code = `javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&t='+Date.now();document.body.appendChild(s)})()`;
+              navigator.clipboard.writeText(code).then(() => {
+                alert('✓ Bookmarklet-Code kopiert!\n\nJetzt ein Lesezeichen erstellen und die URL durch diesen Code ersetzen.');
+              }).catch(() => {
+                prompt('Kopiere diesen Code manuell:', code);
+              });
+            }}
+          >
+            Code kopieren
+          </button>
         </div>
       </div>
 
