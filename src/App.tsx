@@ -78,17 +78,17 @@ export default function App() {
         </p>
         <a
           className="bookmarklet-link"
-          href={`javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?t='+Date.now();document.body.appendChild(s)})()`}
+          href={`javascript:(function(){var s=document.createElement('script');s.src='${window.location.origin}/bookmarklet.js?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&t='+Date.now();document.body.appendChild(s)})()`}
           onClick={(e) => { e.preventDefault(); alert('Ziehe diesen Button in deine Lesezeichen-Leiste!'); }}
         >
-          Speed Read
+          Speed Read ({wpm} WPM)
         </a>
         <div className="bookmarklet-instructions">
           <strong>Anleitung:</strong><br/>
-          1. Ziehe den Button oben in deine Lesezeichen-Leiste<br/>
-          2. Gehe auf eine beliebige Webseite<br/>
-          3. Optional: Markiere den Text, den du lesen möchtest<br/>
-          4. Klicke auf das Bookmarklet → Fullscreen Speed Reading startet
+          1. Stelle unten deine gewünschten Einstellungen ein<br/>
+          2. Ziehe den Button oben in deine Lesezeichen-Leiste<br/>
+          3. Gehe auf eine beliebige Webseite, markiere optional Text<br/>
+          4. Klicke auf das Bookmarklet → Speed Reading mit deinen Einstellungen
         </div>
       </div>
 

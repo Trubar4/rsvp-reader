@@ -1,6 +1,7 @@
 /**
  * RSVP Reader Bookmarklet - Overlay Version
  * Lädt auf der aktuellen Seite ein Fullscreen-Overlay für Speed Reading
+ * Einstellungen werden aus der Script-URL gelesen (im Bookmarklet kodiert)
  */
 (function() {
   'use strict';
@@ -11,6 +12,28 @@
     return;
   }
   window.__rsvpReaderActive = true;
+
+  // ===== Einstellungen aus Script-URL lesen =====
+  function getSettings() {
+    const defaults = { wpm: 300, chunk: 1, scale: 1.0, fg: '#1a1a2e', bg: '#f8f9fa' };
+    try {
+      const scripts = document.getElementsByTagName('script');
+      const currentScript = scripts[scripts.length - 1];
+      const src = currentScript.src || '';
+      const params = new URL(src).searchParams;
+      return {
+        wpm: parseInt(params.get('wpm')) || defaults.wpm,
+        chunk: parseInt(params.get('chunk')) || defaults.chunk,
+        scale: parseFloat(params.get('scale')) || defaults.scale,
+        fg: decodeURIComponent(params.get('fg') || defaults.fg),
+        bg: decodeURIComponent(params.get('bg') || defaults.bg)
+      };
+    } catch (e) {
+      return defaults;
+    }
+  }
+
+  const settings = getSettings();
 
   // ===== Text Extraction =====
   function extractText() {
@@ -71,18 +94,25 @@
     return Math.floor(len / 3);
   }
 
-  // ===== Tokenizer =====
-  function tokenize(text) {
+  // ===== Tokenizer with Chunking =====
+  function tokenize(text, chunkSize) {
     const words = text.split(/\s+/).filter(w => w.length > 0);
-    return words.map(w => ({
-      text: w,
-      orp: getORP(w.replace(/[^a-zA-ZäöüÄÖÜß]/g, ''))
-    }));
+    const tokens = [];
+
+    for (let i = 0; i < words.length; i += chunkSize) {
+      const chunk = words.slice(i, i + chunkSize);
+      const mainWord = chunk[Math.floor(chunk.length / 2)];
+      tokens.push({
+        text: chunk.join(' '),
+        orp: getORP(mainWord.replace(/[^a-zA-ZäöüÄÖÜß]/g, ''))
+      });
+    }
+    return tokens;
   }
 
   // ===== Create Overlay =====
   function createOverlay(text) {
-    const tokens = tokenize(text);
+    const tokens = tokenize(text, settings.chunk);
     if (tokens.length === 0) {
       alert('Kein Text gefunden. Markiere Text oder öffne einen Artikel.');
       window.__rsvpReaderActive = false;
@@ -91,17 +121,22 @@
 
     let pos = 0;
     let playing = true;
-    let wpm = parseInt(localStorage.getItem('rsvp-wpm') || '300');
+    let wpm = settings.wpm;
     let intervalId = null;
 
-    // Styles
+    // Farben aus Einstellungen
+    const bgColor = settings.bg;
+    const fgColor = settings.fg;
+    const fontSize = Math.round(42 * settings.scale);
+
+    // Styles mit benutzerdefinierten Farben
     const styles = `
       #rsvp-overlay {
         position: fixed;
         inset: 0;
         z-index: 2147483647;
-        background: #f8f9fa;
-        color: #1a1a2e;
+        background: ${bgColor};
+        color: ${fgColor};
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         display: flex;
         flex-direction: column;
@@ -121,16 +156,16 @@
         padding: 20px;
       }
       #rsvp-word {
-        font-size: clamp(28px, 8vw, 56px);
+        font-size: clamp(${fontSize * 0.7}px, 8vw, ${fontSize * 1.3}px);
         font-family: ui-monospace, 'SF Mono', Consolas, monospace;
         white-space: nowrap;
         letter-spacing: 0.02em;
       }
-      #rsvp-word .pre, #rsvp-word .post { color: #1a1a2e; }
+      #rsvp-word .pre, #rsvp-word .post { color: ${fgColor}; }
       #rsvp-word .pivot { color: #e63946; font-weight: 600; }
       #rsvp-controls {
-        background: #ffffff;
-        border-top: 1px solid #e9ecef;
+        background: ${bgColor};
+        border-top: 1px solid rgba(128,128,128,0.3);
         padding: 16px 20px;
         display: flex;
         flex-direction: column;
@@ -152,13 +187,13 @@
         border: none;
         border-radius: 12px;
         cursor: pointer;
-        background: #f8f9fa;
-        color: #1a1a2e;
-        border: 1px solid #e9ecef;
+        background: rgba(128,128,128,0.15);
+        color: ${fgColor};
+        border: 1px solid rgba(128,128,128,0.3);
         transition: all 0.15s;
         touch-action: manipulation;
       }
-      .rsvp-btn:hover { background: #e9ecef; }
+      .rsvp-btn:hover { background: rgba(128,128,128,0.25); }
       .rsvp-btn:active { transform: scale(0.97); }
       .rsvp-btn-primary {
         background: #4361ee;
@@ -170,14 +205,15 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #f8f9fa;
+        background: rgba(128,128,128,0.1);
         padding: 6px;
         border-radius: 12px;
       }
       .rsvp-label {
         font-size: 12px;
         font-weight: 600;
-        color: #6c757d;
+        color: ${fgColor};
+        opacity: 0.7;
         text-transform: uppercase;
         padding: 0 8px;
       }
@@ -186,10 +222,11 @@
         font-weight: 700;
         min-width: 48px;
         text-align: center;
+        color: ${fgColor};
       }
       #rsvp-progress {
         height: 6px;
-        background: #e9ecef;
+        background: rgba(128,128,128,0.2);
         border-radius: 3px;
         overflow: hidden;
         cursor: pointer;
@@ -203,16 +240,15 @@
       #rsvp-info {
         text-align: center;
         font-size: 12px;
-        color: #6c757d;
+        color: ${fgColor};
+        opacity: 0.6;
       }
-      @media (prefers-color-scheme: dark) {
-        #rsvp-overlay { background: #1a1a2e; color: #f8f9fa; }
-        #rsvp-word .pre, #rsvp-word .post { color: #f8f9fa; }
-        #rsvp-controls { background: #16213e; border-color: #2d3748; }
-        .rsvp-btn { background: #1a1a2e; color: #f8f9fa; border-color: #2d3748; }
-        .rsvp-btn:hover { background: #2d3748; }
-        .rsvp-group { background: #1a1a2e; }
-        #rsvp-progress { background: #2d3748; }
+      #rsvp-info kbd {
+        background: rgba(128,128,128,0.2);
+        border: 1px solid rgba(128,128,128,0.3);
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-family: inherit;
       }
     `;
 
@@ -257,15 +293,31 @@
     const wpmEl = overlay.querySelector('#rsvp-wpm');
     const progressBar = overlay.querySelector('#rsvp-progress-bar');
 
-    // Render word
+    // Render word - für Chunks: zeige das mittlere Wort mit ORP
     function renderWord() {
       const token = tokens[pos];
       if (!token) return;
 
+      // Bei Chunks: finde das Hauptwort und seinen ORP
+      const words = token.text.split(' ');
+      const mainIdx = Math.floor(words.length / 2);
+      const mainWord = words[mainIdx];
       const orp = token.orp;
-      preEl.textContent = token.text.slice(0, orp);
-      pivotEl.textContent = token.text.slice(orp, orp + 1);
-      postEl.textContent = token.text.slice(orp + 1);
+
+      if (words.length === 1) {
+        // Einzelnes Wort
+        preEl.textContent = mainWord.slice(0, orp);
+        pivotEl.textContent = mainWord.slice(orp, orp + 1);
+        postEl.textContent = mainWord.slice(orp + 1);
+      } else {
+        // Chunk: zeige alle Wörter, markiere den Pivot im mittleren Wort
+        const before = words.slice(0, mainIdx).join(' ');
+        const after = words.slice(mainIdx + 1).join(' ');
+
+        preEl.textContent = (before ? before + ' ' : '') + mainWord.slice(0, orp);
+        pivotEl.textContent = mainWord.slice(orp, orp + 1);
+        postEl.textContent = mainWord.slice(orp + 1) + (after ? ' ' + after : '');
+      }
 
       progressBar.style.width = ((pos / tokens.length) * 100) + '%';
     }
@@ -308,7 +360,6 @@
     function setWPM(newWpm) {
       wpm = Math.max(50, Math.min(1000, newWpm));
       wpmEl.textContent = wpm;
-      localStorage.setItem('rsvp-wpm', wpm);
       if (playing) {
         stop();
         start();
