@@ -3,7 +3,6 @@ import type { Language } from '../App';
 
 type ChunkSize = 1 | 2 | 3 | 4 | 5;
 
-// Klemmt einen number wieder sauber auf die Union 1|2|3|4|5
 const clampChunk = (n: number): ChunkSize =>
   Math.max(1, Math.min(5, Math.round(n))) as ChunkSize;
 
@@ -20,35 +19,62 @@ export default function SettingsPanel(
 ) {
   return (
     <div className="settings">
-      <label>Language
+      <div className="setting-item">
+        <span className="setting-label">Sprache</span>
         <select value={lang} onChange={e => setLang(e.target.value as Language)}>
-          <option value="en">English</option>
           <option value="de">Deutsch</option>
+          <option value="en">English</option>
         </select>
-      </label>
+      </div>
 
-      <label>WPM: {wpm}
-        <input type="range" min={50} max={1000} step={25} value={wpm}
-          onChange={e => setWpm(Number(e.target.value))} />
-      </label>
+      <div className="setting-item">
+        <span className="setting-label">Geschwindigkeit (WPM)</span>
+        <span className="setting-value">{wpm}</span>
+        <input
+          type="range"
+          min={50}
+          max={1000}
+          step={25}
+          value={wpm}
+          onChange={e => setWpm(Number(e.target.value))}
+        />
+      </div>
 
-      <label>Chunk: {chunk}
-        <input type="range" min={1} max={5} step={1} value={chunk}
-          onChange={e => setChunk(clampChunk(Number(e.target.value)))} />
-      </label>
+      <div className="setting-item">
+        <span className="setting-label">Wörter pro Anzeige</span>
+        <span className="setting-value">{chunk}</span>
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          value={chunk}
+          onChange={e => setChunk(clampChunk(Number(e.target.value)))}
+        />
+      </div>
 
-      <label>Text size
-        <input type="range" min={0.8} max={1.6} step={0.05} value={textScale}
-          onChange={e => setTextScale(Number(e.target.value))} />
-      </label>
+      <div className="setting-item">
+        <span className="setting-label">Textgröße</span>
+        <span className="setting-value">{Math.round(textScale * 100)}%</span>
+        <input
+          type="range"
+          min={0.8}
+          max={1.6}
+          step={0.05}
+          value={textScale}
+          onChange={e => setTextScale(Number(e.target.value))}
+        />
+      </div>
 
-      <label>Text colour
+      <div className="setting-item">
+        <span className="setting-label">Textfarbe</span>
         <input type="color" value={fg} onChange={e => setFg(e.target.value)} />
-      </label>
+      </div>
 
-      <label>Background
+      <div className="setting-item">
+        <span className="setting-label">Hintergrund</span>
         <input type="color" value={bg} onChange={e => setBg(e.target.value)} />
-      </label>
+      </div>
     </div>
   );
 }
