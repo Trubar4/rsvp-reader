@@ -87,7 +87,10 @@
   // ===== Shared: calibration panel HTML + wiring =====
   function buildCalibHTML(cfg) {
     return `<div id="bm-calib" style="display:none;position:absolute;top:0;left:0;right:0;z-index:20;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);color:white;padding:14px 16px;flex-direction:column;gap:10px;border-bottom:1px solid rgba(255,255,255,.15)">
-      <strong style="font-size:.95rem">Kalibrierung</strong>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.15)">
+        <strong style="font-size:.95rem">OptoTraining</strong>
+        <button id="bc-opto-toggle" style="padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;background:${cfg.opto?'#4361ee':'rgba(255,255,255,.2)'};color:white">${cfg.opto?'AN ✓':'AUS'}</button>
+      </div>
       <div id="bc-wlabel" style="font-size:.8rem;opacity:.7;text-align:center">Streifenbreite: ${cfg.stripeW} px</div>
       <div style="display:flex;align-items:center;gap:6px">
         <button class="bm-cs" data-act="wm5">−5</button><button class="bm-cs" data-act="wm1">−1</button>
@@ -122,6 +125,16 @@
       overlay.querySelector('#bc-oslider').value = cfg.stripeOff;
       overlay.querySelector('#bc-olabel').textContent = 'Versatz: ' + cfg.stripeOff + ' px';
       onUpdate();
+    }
+    // OptoTraining toggle
+    const optoBtn = overlay.querySelector('#bc-opto-toggle');
+    if (optoBtn) {
+      optoBtn.addEventListener('click', () => {
+        cfg.opto = !cfg.opto;
+        optoBtn.textContent = cfg.opto ? 'AN ✓' : 'AUS';
+        optoBtn.style.background = cfg.opto ? '#4361ee' : 'rgba(255,255,255,.2)';
+        onUpdate();
+      });
     }
     overlay.querySelectorAll('.bm-cs').forEach(btn => {
       btn.style.cssText = 'min-width:44px;min-height:44px;padding:0 8px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.25);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer';
@@ -171,23 +184,23 @@
   function createBarOverlay(rawText) {
     const paragraphs = rawText.split(/\n{2,}/).map(p => p.replace(/\s+/g,' ').trim()).filter(Boolean);
     const fontSize = Math.round(18 * S.scale);
-    const cfg = { stripeW: S.stripeW, stripeOff: S.stripeOff, red: S.red, cyan: S.cyan, fg: S.fg, opto: S.opto };
+    // opto defaults to true in bar reader — user can toggle off in calibration panel
+    const cfg = { stripeW: S.stripeW, stripeOff: S.stripeOff, red: S.red, cyan: S.cyan, fg: S.fg, opto: S.opto !== false };
 
     const overlay = document.createElement('div');
     overlay.id = 'bm-overlay';
     overlay.style.cssText = `position:fixed;inset:0;z-index:2147483647;background:${S.bg};color:${S.fg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;flex-direction:column`;
 
-    const calibHTML = cfg.opto ? buildCalibHTML(cfg) : '';
     const paragraphsHTML = paragraphs.map(p => `<p style="margin:0 0 1.2em 0">${p.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`).join('');
 
     overlay.innerHTML = `
       <style id="bm-stripe-style"></style>
-      ${calibHTML}
+      ${buildCalibHTML(cfg)}
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${S.bg};border-bottom:1px solid rgba(128,128,128,.25);flex-shrink:0;gap:8px">
         <button id="bm-close" style="${btnStyle('rgba(128,128,128,.15)', S.fg)}">← Schließen</button>
         <div style="display:flex;gap:8px">
-          ${cfg.opto ? `<button id="bm-calib-open" style="${btnStyle('#4361ee','white')}">Kalibrieren</button>` : ''}
-          <button id="bm-switch" style="${btnStyle('rgba(128,128,128,.15)', S.fg)}" title="Zu RSVP wechseln">RSVP</button>
+          <button id="bm-calib-open" style="${btnStyle('#4361ee','white')}">Kalibrieren</button>
+          <button id="bm-switch" style="${btnStyle('rgba(128,128,128,.15)', S.fg)}">RSVP</button>
         </div>
       </div>
       <div id="bm-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch">
@@ -197,19 +210,15 @@
     document.body.appendChild(overlay);
 
     function updateStripes() {
-      const styleEl = overlay.querySelector('#bm-stripe-style');
-      styleEl.textContent = cfg.opto ? buildStripeCSS('#bm-text p', cfg) : '';
+      overlay.querySelector('#bm-stripe-style').textContent = cfg.opto ? buildStripeCSS('#bm-text p', cfg) : '';
     }
     updateStripes();
 
-    if (cfg.opto) {
-      wireCalib(overlay, cfg, updateStripes);
-      overlay.querySelector('#bm-calib-open').addEventListener('click', () => {
-        const p = overlay.querySelector('#bm-calib');
-        p.style.display = 'flex'; p.style.flexDirection = 'column';
-      });
-    }
-
+    wireCalib(overlay, cfg, updateStripes);
+    overlay.querySelector('#bm-calib-open').addEventListener('click', () => {
+      const p = overlay.querySelector('#bm-calib');
+      p.style.display = 'flex'; p.style.flexDirection = 'column';
+    });
     overlay.querySelector('#bm-close').addEventListener('click', close);
     overlay.querySelector('#bm-switch').addEventListener('click', () => launch('rsvp'));
   }
