@@ -58,7 +58,7 @@
       const m = (window.name || '').match(/__rsvp__(\{[^}]*\})/);
       if (m) saved = JSON.parse(m[1]);
       // localStorage: same-origin, cross-session fallback
-      if (!saved) saved = JSON.parse(localStorage.getItem('rsvp-opto-calib') || 'null');
+      if (!saved) saved = JSON.parse(localStorage.getItem('rsvp-opto-v2') || 'null');
       if (!saved) return s;
       if (saved.stripeW   !== undefined) s.stripeW   = saved.stripeW;
       if (saved.stripeOff !== undefined) s.stripeOff = saved.stripeOff;
@@ -73,7 +73,7 @@
     const data = { stripeW: cfg.stripeW, stripeOff: cfg.stripeOff, red: cfg.red, cyan: cfg.cyan };
     try {
       window.name = (window.name || '').replace(/__rsvp__\{[^}]*\}/, '') + '__rsvp__' + JSON.stringify(data);
-      localStorage.setItem('rsvp-opto-calib', JSON.stringify(data));
+      localStorage.setItem('rsvp-opto-v2', JSON.stringify(data));
     } catch(e) {}
   }
 
