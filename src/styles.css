@@ -786,7 +786,7 @@ kbd {
   );
   background-size: calc(var(--stripe-w) * 9) 100%;
   background-attachment: fixed;
-  background-position: var(--stripe-offset, 0px) var(--bar-scroll, 0px);
+  background-position: var(--stripe-offset, 0px) 0;
   background-repeat: repeat-x;
   -webkit-background-clip: text;
   background-clip: text;

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import CalibrationPanel from './CalibrationPanel';
 
 type Token = { text: string; type: 'word' | 'punct' | 'paragraph_break' };
@@ -50,15 +50,7 @@ export default function BarReaderScreen({
   onExit: () => void;
 } & OptoProps) {
   const [calibrating, setCalibrating] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
   const paragraphs = useMemo(() => buildParagraphs(tokens), [tokens]);
-
-  // Scroll compensation so stripes stay screen-fixed even on iOS
-  // (background-attachment:fixed doesn't work inside overflow containers on Safari)
-  function handleScroll() {
-    setScrollTop(scrollRef.current?.scrollTop ?? 0);
-  }
 
   return (
     <div
@@ -68,7 +60,6 @@ export default function BarReaderScreen({
         '--stripe-w': `${stripeWidth}px`,
         '--stripe-red': stripeRed,
         '--stripe-cyan': stripeCyan,
-        '--bar-scroll': `${-scrollTop}px`,
         '--bg': bg,
         '--fg': fg,
       } as React.CSSProperties}
@@ -95,11 +86,7 @@ export default function BarReaderScreen({
         )}
       </div>
 
-      <div
-        ref={scrollRef}
-        className="bar-reader-scroll"
-        onScroll={handleScroll}
-      >
+      <div className="bar-reader-scroll">
         <div
           className="bar-reader-text"
           style={{ fontSize: `${Math.round(18 * textScale)}px` }}
