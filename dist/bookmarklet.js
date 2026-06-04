@@ -42,7 +42,32 @@
     } catch(e) { return d; }
   }
 
-  const S = getSettings();
+  // ===== Persist calibration in localStorage =====
+  const CALIB_KEY = 'rsvp-opto-calib';
+
+  function loadCalib(s) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CALIB_KEY) || 'null');
+      if (!saved) return s;
+      if (saved.stripeW  !== undefined) s.stripeW  = saved.stripeW;
+      if (saved.stripeOff !== undefined) s.stripeOff = saved.stripeOff;
+      if (saved.red)  s.red  = saved.red;
+      if (saved.cyan) s.cyan = saved.cyan;
+      if (saved.opto  !== undefined) s.opto  = saved.opto;
+    } catch(e) {}
+    return s;
+  }
+
+  function saveCalib(cfg) {
+    try {
+      localStorage.setItem(CALIB_KEY, JSON.stringify({
+        stripeW: cfg.stripeW, stripeOff: cfg.stripeOff,
+        red: cfg.red, cyan: cfg.cyan, opto: cfg.opto,
+      }));
+    } catch(e) {}
+  }
+
+  const S = loadCalib(getSettings());
 
   // ===== Text extraction =====
   function extractText() {
@@ -121,17 +146,18 @@
   function wireCalib(overlay, cfg, onUpdate) {
     const panel = overlay.querySelector('#bm-calib');
     if (!panel) return;
+    function update() { onUpdate(); saveCalib(cfg); }
     function setW(v) {
       cfg.stripeW = Math.max(10, Math.min(300, v));
       overlay.querySelector('#bc-wslider').value = cfg.stripeW;
       overlay.querySelector('#bc-wlabel').textContent = 'Streifenbreite: ' + cfg.stripeW + ' px';
-      onUpdate();
+      update();
     }
     function setOff(v) {
       cfg.stripeOff = Math.max(-300, Math.min(300, v));
       overlay.querySelector('#bc-oslider').value = cfg.stripeOff;
       overlay.querySelector('#bc-olabel').textContent = 'Versatz: ' + cfg.stripeOff + ' px';
-      onUpdate();
+      update();
     }
     // OptoTraining toggle
     const optoBtn = overlay.querySelector('#bc-opto-toggle');
@@ -140,7 +166,7 @@
         cfg.opto = !cfg.opto;
         optoBtn.textContent = cfg.opto ? 'AN ✓' : 'AUS';
         optoBtn.style.background = cfg.opto ? '#4361ee' : 'rgba(255,255,255,.2)';
-        onUpdate();
+        update();
       });
     }
     overlay.querySelectorAll('.bm-cs').forEach(btn => {
@@ -155,14 +181,14 @@
         else if (a==='om1') setOff(cfg.stripeOff-1);
         else if (a==='op1') setOff(cfg.stripeOff+1);
         else if (a==='op10') setOff(cfg.stripeOff+10);
-        else if (a==='rreset') { cfg.red='#FF0000'; overlay.querySelector('#bc-red').value=cfg.red; onUpdate(); }
-        else if (a==='creset') { cfg.cyan='#00FFFF'; overlay.querySelector('#bc-cyan').value=cfg.cyan; onUpdate(); }
+        else if (a==='rreset') { cfg.red='#FF0000'; overlay.querySelector('#bc-red').value=cfg.red; update(); }
+        else if (a==='creset') { cfg.cyan='#00FFFF'; overlay.querySelector('#bc-cyan').value=cfg.cyan; update(); }
       });
     });
     overlay.querySelector('#bc-wslider').addEventListener('input', e => setW(Number(e.target.value)));
     overlay.querySelector('#bc-oslider').addEventListener('input', e => setOff(Number(e.target.value)));
-    overlay.querySelector('#bc-red').addEventListener('input', e => { cfg.red = e.target.value; onUpdate(); });
-    overlay.querySelector('#bc-cyan').addEventListener('input', e => { cfg.cyan = e.target.value; onUpdate(); });
+    overlay.querySelector('#bc-red').addEventListener('input', e => { cfg.red = e.target.value; update(); });
+    overlay.querySelector('#bc-cyan').addEventListener('input', e => { cfg.cyan = e.target.value; update(); });
     overlay.querySelector('#bc-done').addEventListener('click', () => { panel.style.display = 'none'; });
   }
 
