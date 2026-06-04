@@ -171,6 +171,8 @@ export default function App() {
           fg={fg} setFg={setFg}
           bg={bg} setBg={setBg}
           optotraining={optotraining} setOptotraining={setOptotraining}
+          stripeRed={stripeRed} setStripeRed={setStripeRed}
+          stripeCyan={stripeCyan} setStripeCyan={setStripeCyan}
         />
       </div>
 

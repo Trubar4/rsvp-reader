@@ -7,7 +7,8 @@ const clampChunk = (n: number): ChunkSize =>
   Math.max(1, Math.min(5, Math.round(n))) as ChunkSize;
 
 export default function SettingsPanel(
-  { lang, setLang, wpm, setWpm, chunk, setChunk, textScale, setTextScale, fg, setFg, bg, setBg, optotraining, setOptotraining } :
+  { lang, setLang, wpm, setWpm, chunk, setChunk, textScale, setTextScale, fg, setFg, bg, setBg,
+    optotraining, setOptotraining, stripeRed, setStripeRed, stripeCyan, setStripeCyan } :
   {
     lang: Language; setLang: (l:Language)=>void;
     wpm: number; setWpm: (n:number)=>void;
@@ -16,6 +17,8 @@ export default function SettingsPanel(
     fg: string; setFg: (s:string)=>void;
     bg: string; setBg: (s:string)=>void;
     optotraining: boolean; setOptotraining: (v: boolean)=>void;
+    stripeRed: string; setStripeRed: (s: string)=>void;
+    stripeCyan: string; setStripeCyan: (s: string)=>void;
   }
 ) {
   return (
@@ -90,9 +93,19 @@ export default function SettingsPanel(
           </label>
         </div>
         {optotraining && (
-          <span style={{ fontSize: '0.75rem', color: 'var(--fg-muted)' }}>
-            Streifen aktiv · Kalibrierung im Player
-          </span>
+          <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="setting-item" style={{ margin: 0 }}>
+              <span className="setting-label" style={{ fontSize: '0.85rem' }}>Rot-Farbe</span>
+              <input type="color" value={stripeRed} onChange={e => setStripeRed(e.target.value)} />
+            </div>
+            <div className="setting-item" style={{ margin: 0 }}>
+              <span className="setting-label" style={{ fontSize: '0.85rem' }}>Cyan-Farbe</span>
+              <input type="color" value={stripeCyan} onChange={e => setStripeCyan(e.target.value)} />
+            </div>
+            <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>
+              Feinabstimmung im Player möglich
+            </span>
+          </div>
         )}
       </div>
     </div>
