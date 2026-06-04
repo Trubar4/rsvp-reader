@@ -16,21 +16,28 @@
                 mode: 'rsvp', opto: false, stripeW: 80, stripeOff: 0,
                 red: '#FF0000', cyan: '#00FFFF' };
     try {
-      const scripts = document.getElementsByTagName('script');
-      const src = scripts[scripts.length - 1].src || '';
+      const el = document.currentScript || (function() {
+        const s = document.getElementsByTagName('script');
+        return s[s.length - 1];
+      })();
+      const src = (el && el.src) || '';
+      if (!src) return d;
       const p = new URL(src).searchParams;
+      function num(key, def) { const v = parseInt(p.get(key)); return isNaN(v) ? def : v; }
+      function flt(key, def) { const v = parseFloat(p.get(key)); return isNaN(v) ? def : v; }
+      function col(key, def) { const v = p.get(key); return v ? decodeURIComponent(v) : def; }
       return {
-        wpm:       parseInt(p.get('wpm'))       || d.wpm,
-        chunk:     parseInt(p.get('chunk'))     || d.chunk,
-        scale:     parseFloat(p.get('scale'))   || d.scale,
-        fg:        decodeURIComponent(p.get('fg')   || d.fg),
-        bg:        decodeURIComponent(p.get('bg')   || d.bg),
+        wpm:       num('wpm',       d.wpm),
+        chunk:     num('chunk',     d.chunk),
+        scale:     flt('scale',     d.scale),
+        fg:        col('fg',        d.fg),
+        bg:        col('bg',        d.bg),
         mode:      p.get('mode') || d.mode,
         opto:      p.get('opto') === '1',
-        stripeW:   parseInt(p.get('stripeW'))   || d.stripeW,
-        stripeOff: parseInt(p.get('stripeOff')) || d.stripeOff,
-        red:       decodeURIComponent(p.get('red')  || d.red),
-        cyan:      decodeURIComponent(p.get('cyan') || d.cyan),
+        stripeW:   num('stripeW',   d.stripeW),
+        stripeOff: num('stripeOff', d.stripeOff),
+        red:       col('red',       d.red),
+        cyan:      col('cyan',      d.cyan),
       };
     } catch(e) { return d; }
   }
