@@ -769,9 +769,11 @@ kbd {
   margin: 0 0 1.3em 0;
 }
 
-/* OptoTraining stripes in bar reader
-   Uses --bar-scroll for scroll compensation (iOS Safari doesn't support
-   background-attachment:fixed inside overflow containers) */
+/* OptoTraining stripes in bar reader.
+   No background-attachment:fixed — iOS Safari ignores it inside overflow
+   containers. For vertical stripes the gradient only varies along X, so
+   vertical scrolling never changes which stripe color a character falls
+   under. background-attachment:scroll (default) works correctly here. */
 .bar-reader.opto-active .bar-reader-text p {
   background-image: linear-gradient(to right,
     var(--fg)          0px                        var(--stripe-w),
@@ -785,7 +787,6 @@ kbd {
     var(--fg)          calc(var(--stripe-w) * 8)  calc(var(--stripe-w) * 9)
   );
   background-size: calc(var(--stripe-w) * 9) 100%;
-  background-attachment: fixed;
   background-position: var(--stripe-offset, 0px) 0;
   background-repeat: repeat-x;
   -webkit-background-clip: text;
