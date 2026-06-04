@@ -482,6 +482,182 @@ kbd {
   }
 }
 
+/* ===== OptoTraining ===== */
+
+/* Stripe gradient on text: t r t g t r t g t (9 equal stripes) */
+.player-root.opto-active .pre,
+.player-root.opto-active .post,
+.player-root.opto-active .pivot,
+.player-root.opto-active .side-left,
+.player-root.opto-active .side-right {
+  background-image: linear-gradient(to right,
+    var(--fg) 0% 11.111%,
+    #FF0000 11.111% 22.222%,
+    var(--fg) 22.222% 33.333%,
+    #00FFFF 33.333% 44.444%,
+    var(--fg) 44.444% 55.556%,
+    #FF0000 55.556% 66.667%,
+    var(--fg) 66.667% 77.778%,
+    #00FFFF 77.778% 88.889%,
+    var(--fg) 88.889% 100%
+  );
+  background-size: 100vw 100%;
+  background-attachment: fixed;
+  background-position: var(--stripe-offset, 0px) 0;
+  background-repeat: repeat-x;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+/* OptoTraining toggle switch */
+.opto-toggle {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.opto-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.opto-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.opto-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.opto-toggle input:checked + .opto-toggle-slider {
+  background: var(--primary);
+}
+.opto-toggle input:checked + .opto-toggle-slider::before {
+  transform: translateX(24px);
+}
+
+/* OptoTraining setting row */
+.setting-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Calibration button (floating in player) */
+.opto-calib-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  z-index: 20;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  touch-action: manipulation;
+}
+.opto-calib-btn:active {
+  opacity: 0.75;
+}
+
+/* Calibration panel overlay */
+.opto-calib-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.opto-calib-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.opto-calib-offset {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  text-align: center;
+}
+.opto-calib-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opto-calib-row input[type="range"] {
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+}
+.opto-calib-row input[type="range"]::-webkit-slider-thumb {
+  background: white;
+}
+.opto-calib-row input[type="range"]::-moz-range-thumb {
+  background: white;
+  border-color: white;
+}
+.opto-calib-step {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+.opto-calib-step:active {
+  background: rgba(255,255,255,0.3);
+}
+.opto-calib-done {
+  align-self: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 28px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.opto-calib-done:active {
+  opacity: 0.85;
+}
+
 /* ===== Bookmarklet Page ===== */
 .bookmarklet-section {
   background: linear-gradient(135deg, var(--primary), #7209b7);

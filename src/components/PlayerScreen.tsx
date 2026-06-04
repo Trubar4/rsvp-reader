@@ -10,7 +10,7 @@ type Token = {
 };
 
 export default function PlayerScreen(
-  { tokens, lang, wpm, chunk, textScale, fg, bg, onExit, onUpdate }:
+  { tokens, lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, onStripeOffsetChange, onExit, onUpdate }:
   {
     tokens: Token[];
     lang: 'en' | 'de';
@@ -19,6 +19,9 @@ export default function PlayerScreen(
     textScale: number;
     fg: string;
     bg: string;
+    optotraining: boolean;
+    stripeOffset: number;
+    onStripeOffsetChange: (n: number) => void;
     onExit: () => void;
     onUpdate: (s: { wpm: number; chunk: 1 | 2 | 3 | 4 | 5 }) => void;
   }
@@ -26,6 +29,7 @@ export default function PlayerScreen(
   const [pos, setPos] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [stats, setStats] = useState({ startedAt: Date.now(), elapsedMs: 0, wordsShown: 0 });
+  const [calibrating, setCalibrating] = useState(false);
 
   const { chunks, totalWords, totalMs } = useMemo(() => buildChunks(tokens, wpm, chunk), [tokens, wpm, chunk]);
 
@@ -81,7 +85,37 @@ export default function PlayerScreen(
   }, [bg, fg]);
 
   return (
-    <div className="player-root">
+    <div
+      className={`player-root${optotraining ? ' opto-active' : ''}`}
+      style={{ '--stripe-offset': `${stripeOffset}px` } as React.CSSProperties}
+    >
+      {calibrating && (
+        <div className="opto-calib-panel" onClick={e => e.stopPropagation()}>
+          <h3>Kalibrierung</h3>
+          <div className="opto-calib-offset">Versatz: {stripeOffset} px</div>
+          <div className="opto-calib-row">
+            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 10)}>−10</button>
+            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 1)}>−1</button>
+            <input
+              type="range"
+              min={-300}
+              max={300}
+              value={stripeOffset}
+              onChange={e => onStripeOffsetChange(Number(e.target.value))}
+            />
+            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 1)}>+1</button>
+            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 10)}>+10</button>
+          </div>
+          <button className="opto-calib-done" onClick={() => setCalibrating(false)}>Fertig</button>
+        </div>
+      )}
+
+      {optotraining && !calibrating && (
+        <button className="opto-calib-btn" onClick={e => { e.stopPropagation(); setCalibrating(true); }}>
+          Kalibrieren
+        </button>
+      )}
+
       <div className="focal-wrap" onClick={onTap}>
         <FocalWord
           chunk={current}
