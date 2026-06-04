@@ -491,17 +491,17 @@ kbd {
 .player-root.opto-active .side-left,
 .player-root.opto-active .side-right {
   background-image: linear-gradient(to right,
-    var(--fg) 0% 11.111%,
-    #FF0000 11.111% 22.222%,
-    var(--fg) 22.222% 33.333%,
-    #00FFFF 33.333% 44.444%,
-    var(--fg) 44.444% 55.556%,
-    #FF0000 55.556% 66.667%,
-    var(--fg) 66.667% 77.778%,
-    #00FFFF 77.778% 88.889%,
-    var(--fg) 88.889% 100%
+    var(--fg)    0px                        var(--stripe-w),
+    #FF0000      var(--stripe-w)            calc(var(--stripe-w) * 2),
+    var(--fg)    calc(var(--stripe-w) * 2)  calc(var(--stripe-w) * 3),
+    #00FFFF      calc(var(--stripe-w) * 3)  calc(var(--stripe-w) * 4),
+    var(--fg)    calc(var(--stripe-w) * 4)  calc(var(--stripe-w) * 5),
+    #FF0000      calc(var(--stripe-w) * 5)  calc(var(--stripe-w) * 6),
+    var(--fg)    calc(var(--stripe-w) * 6)  calc(var(--stripe-w) * 7),
+    #00FFFF      calc(var(--stripe-w) * 7)  calc(var(--stripe-w) * 8),
+    var(--fg)    calc(var(--stripe-w) * 8)  calc(var(--stripe-w) * 9)
   );
-  background-size: 100vw 100%;
+  background-size: calc(var(--stripe-w) * 9) 100%;
   background-attachment: fixed;
   background-position: var(--stripe-offset, 0px) 0;
   background-repeat: repeat-x;
@@ -602,7 +602,8 @@ kbd {
   font-weight: 600;
   letter-spacing: 0.03em;
 }
-.opto-calib-offset {
+.opto-calib-offset,
+.opto-calib-label {
   font-size: 0.9rem;
   opacity: 0.75;
   text-align: center;

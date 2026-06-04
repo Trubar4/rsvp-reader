@@ -10,7 +10,7 @@ type Token = {
 };
 
 export default function PlayerScreen(
-  { tokens, lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, onStripeOffsetChange, onExit, onUpdate }:
+  { tokens, lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, onStripeOffsetChange, stripeWidth, onStripeWidthChange, onExit, onUpdate }:
   {
     tokens: Token[];
     lang: 'en' | 'de';
@@ -22,6 +22,8 @@ export default function PlayerScreen(
     optotraining: boolean;
     stripeOffset: number;
     onStripeOffsetChange: (n: number) => void;
+    stripeWidth: number;
+    onStripeWidthChange: (n: number) => void;
     onExit: () => void;
     onUpdate: (s: { wpm: number; chunk: 1 | 2 | 3 | 4 | 5 }) => void;
   }
@@ -87,12 +89,26 @@ export default function PlayerScreen(
   return (
     <div
       className={`player-root${optotraining ? ' opto-active' : ''}`}
-      style={{ '--stripe-offset': `${stripeOffset}px` } as React.CSSProperties}
+      style={{ '--stripe-offset': `${stripeOffset}px`, '--stripe-w': `${stripeWidth}px` } as React.CSSProperties}
     >
       {calibrating && (
         <div className="opto-calib-panel" onClick={e => e.stopPropagation()}>
           <h3>Kalibrierung</h3>
-          <div className="opto-calib-offset">Versatz: {stripeOffset} px</div>
+          <div className="opto-calib-label">Streifenbreite: {stripeWidth} px</div>
+          <div className="opto-calib-row">
+            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.max(10, stripeWidth - 5))}>−5</button>
+            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.max(10, stripeWidth - 1))}>−1</button>
+            <input
+              type="range"
+              min={10}
+              max={300}
+              value={stripeWidth}
+              onChange={e => onStripeWidthChange(Number(e.target.value))}
+            />
+            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.min(300, stripeWidth + 1))}>+1</button>
+            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.min(300, stripeWidth + 5))}>+5</button>
+          </div>
+          <div className="opto-calib-label">Versatz: {stripeOffset} px</div>
           <div className="opto-calib-row">
             <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 10)}>−10</button>
             <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 1)}>−1</button>
