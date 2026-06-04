@@ -492,13 +492,13 @@ kbd {
 .player-root.opto-active .side-right {
   background-image: linear-gradient(to right,
     var(--fg)    0px                        var(--stripe-w),
-    #FF0000      var(--stripe-w)            calc(var(--stripe-w) * 2),
-    var(--fg)    calc(var(--stripe-w) * 2)  calc(var(--stripe-w) * 3),
-    #00FFFF      calc(var(--stripe-w) * 3)  calc(var(--stripe-w) * 4),
-    var(--fg)    calc(var(--stripe-w) * 4)  calc(var(--stripe-w) * 5),
-    #FF0000      calc(var(--stripe-w) * 5)  calc(var(--stripe-w) * 6),
-    var(--fg)    calc(var(--stripe-w) * 6)  calc(var(--stripe-w) * 7),
-    #00FFFF      calc(var(--stripe-w) * 7)  calc(var(--stripe-w) * 8),
+    var(--stripe-red)  var(--stripe-w)            calc(var(--stripe-w) * 2),
+    var(--fg)          calc(var(--stripe-w) * 2)  calc(var(--stripe-w) * 3),
+    var(--stripe-cyan) calc(var(--stripe-w) * 3)  calc(var(--stripe-w) * 4),
+    var(--fg)          calc(var(--stripe-w) * 4)  calc(var(--stripe-w) * 5),
+    var(--stripe-red)  calc(var(--stripe-w) * 5)  calc(var(--stripe-w) * 6),
+    var(--fg)          calc(var(--stripe-w) * 6)  calc(var(--stripe-w) * 7),
+    var(--stripe-cyan) calc(var(--stripe-w) * 7)  calc(var(--stripe-w) * 8),
     var(--fg)    calc(var(--stripe-w) * 8)  calc(var(--stripe-w) * 9)
   );
   background-size: calc(var(--stripe-w) * 9) 100%;
@@ -643,6 +643,27 @@ kbd {
 .opto-calib-step:active {
   background: rgba(255,255,255,0.3);
 }
+.opto-calib-colors {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+.opto-calib-color-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.opto-calib-color-item input[type="color"] {
+  width: 44px;
+  height: 44px;
+  padding: 2px;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
 .opto-calib-done {
   align-self: center;
   background: var(--primary);

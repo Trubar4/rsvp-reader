@@ -10,7 +10,7 @@ type Token = {
 };
 
 export default function PlayerScreen(
-  { tokens, lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, onStripeOffsetChange, stripeWidth, onStripeWidthChange, onExit, onUpdate }:
+  { tokens, lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, onStripeOffsetChange, stripeWidth, onStripeWidthChange, stripeRed, onStripeRedChange, stripeCyan, onStripeCyanChange, onExit, onUpdate }:
   {
     tokens: Token[];
     lang: 'en' | 'de';
@@ -24,6 +24,10 @@ export default function PlayerScreen(
     onStripeOffsetChange: (n: number) => void;
     stripeWidth: number;
     onStripeWidthChange: (n: number) => void;
+    stripeRed: string;
+    onStripeRedChange: (s: string) => void;
+    stripeCyan: string;
+    onStripeCyanChange: (s: string) => void;
     onExit: () => void;
     onUpdate: (s: { wpm: number; chunk: 1 | 2 | 3 | 4 | 5 }) => void;
   }
@@ -89,7 +93,7 @@ export default function PlayerScreen(
   return (
     <div
       className={`player-root${optotraining ? ' opto-active' : ''}`}
-      style={{ '--stripe-offset': `${stripeOffset}px`, '--stripe-w': `${stripeWidth}px` } as React.CSSProperties}
+      style={{ '--stripe-offset': `${stripeOffset}px`, '--stripe-w': `${stripeWidth}px`, '--stripe-red': stripeRed, '--stripe-cyan': stripeCyan } as React.CSSProperties}
     >
       {calibrating && (
         <div className="opto-calib-panel" onClick={e => e.stopPropagation()}>
@@ -121,6 +125,18 @@ export default function PlayerScreen(
             />
             <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 1)}>+1</button>
             <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 10)}>+10</button>
+          </div>
+          <div className="opto-calib-colors">
+            <div className="opto-calib-color-item">
+              <span>Rot</span>
+              <input type="color" value={stripeRed} onChange={e => onStripeRedChange(e.target.value)} />
+              <button className="opto-calib-step" onClick={() => onStripeRedChange('#FF0000')}>Reset</button>
+            </div>
+            <div className="opto-calib-color-item">
+              <span>Cyan</span>
+              <input type="color" value={stripeCyan} onChange={e => onStripeCyanChange(e.target.value)} />
+              <button className="opto-calib-step" onClick={() => onStripeCyanChange('#00FFFF')}>Reset</button>
+            </div>
           </div>
           <button className="opto-calib-done" onClick={() => setCalibrating(false)}>Fertig</button>
         </div>

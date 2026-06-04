@@ -36,6 +36,8 @@ export default function App() {
   const [optotraining, setOptotraining] = useState<boolean>(saved?.optotraining || false);
   const [stripeOffset, setStripeOffset] = useState<number>(saved?.stripeOffset || 0);
   const [stripeWidth, setStripeWidth] = useState<number>(saved?.stripeWidth || 80);
+  const [stripeRed, setStripeRed] = useState<string>(saved?.stripeRed || '#FF0000');
+  const [stripeCyan, setStripeCyan] = useState<string>(saved?.stripeCyan || '#00FFFF');
   const [playing, setPlaying] = useState(false);
 
   // Bookmarklet URL mit aktuellen Einstellungen
@@ -44,8 +46,8 @@ export default function App() {
 
   // Speichere Einstellungen bei Änderungen
   useEffect(() => {
-    localStorage.setItem('rsvp-settings', JSON.stringify({ lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth }));
-  }, [lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth]);
+    localStorage.setItem('rsvp-settings', JSON.stringify({ lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan }));
+  }, [lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan]);
 
   const cleaned = useTextCleaner(raw);
   const tokens = useTokenizer(cleaned, lang);
@@ -77,6 +79,10 @@ export default function App() {
         onStripeOffsetChange={setStripeOffset}
         stripeWidth={stripeWidth}
         onStripeWidthChange={setStripeWidth}
+        stripeRed={stripeRed}
+        onStripeRedChange={setStripeRed}
+        stripeCyan={stripeCyan}
+        onStripeCyanChange={setStripeCyan}
         onExit={() => setPlaying(false)}
         onUpdate={({ wpm, chunk }) => { setWpm(wpm); setChunk(chunk); }}
       />
