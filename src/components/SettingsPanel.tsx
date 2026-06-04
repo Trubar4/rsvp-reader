@@ -7,7 +7,7 @@ const clampChunk = (n: number): ChunkSize =>
   Math.max(1, Math.min(5, Math.round(n))) as ChunkSize;
 
 export default function SettingsPanel(
-  { lang, setLang, wpm, setWpm, chunk, setChunk, textScale, setTextScale, fg, setFg, bg, setBg } :
+  { lang, setLang, wpm, setWpm, chunk, setChunk, textScale, setTextScale, fg, setFg, bg, setBg, optotraining, setOptotraining } :
   {
     lang: Language; setLang: (l:Language)=>void;
     wpm: number; setWpm: (n:number)=>void;
@@ -15,6 +15,7 @@ export default function SettingsPanel(
     textScale: number; setTextScale: (n:number)=>void;
     fg: string; setFg: (s:string)=>void;
     bg: string; setBg: (s:string)=>void;
+    optotraining: boolean; setOptotraining: (v: boolean)=>void;
   }
 ) {
   return (
@@ -74,6 +75,25 @@ export default function SettingsPanel(
       <div className="setting-item">
         <span className="setting-label">Hintergrund</span>
         <input type="color" value={bg} onChange={e => setBg(e.target.value)} />
+      </div>
+
+      <div className="setting-item">
+        <div className="setting-item-row">
+          <span className="setting-label">OptoTraining</span>
+          <label className="opto-toggle" title="Farbstreifen für Optotraining aktivieren">
+            <input
+              type="checkbox"
+              checked={optotraining}
+              onChange={e => setOptotraining(e.target.checked)}
+            />
+            <span className="opto-toggle-slider" />
+          </label>
+        </div>
+        {optotraining && (
+          <span style={{ fontSize: '0.75rem', color: 'var(--fg-muted)' }}>
+            Streifen aktiv · Kalibrierung im Player
+          </span>
+        )}
       </div>
     </div>
   );
