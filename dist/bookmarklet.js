@@ -16,11 +16,14 @@
                 mode: 'rsvp', opto: false, stripeW: 80, stripeOff: 0,
                 red: '#FF0000', cyan: '#00FFFF' };
     try {
-      const el = document.currentScript || (function() {
-        const s = document.getElementsByTagName('script');
-        return s[s.length - 1];
-      })();
-      const src = (el && el.src) || '';
+      // Search all scripts for ours by filename — reliable across all browsers
+      // regardless of document.currentScript support for dynamic scripts
+      let src = '';
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        const s = scripts[i].src || '';
+        if (s.indexOf('bookmarklet.js') !== -1) { src = s; break; }
+      }
       if (!src) return d;
       const p = new URL(src).searchParams;
       function num(key, def) { const v = parseInt(p.get(key)); return isNaN(v) ? def : v; }
@@ -42,28 +45,35 @@
     } catch(e) { return d; }
   }
 
-  // ===== Persist calibration in localStorage =====
-  const CALIB_KEY = 'rsvp-opto-calib';
+  // ===== Persist calibration across origins via window.name =====
+  // window.name survives cross-origin navigation within the same tab —
+  // no origin restrictions unlike localStorage. localStorage is kept as
+  // a same-site fallback across browser sessions.
+  // opto on/off is NOT persisted — the URL param always controls that.
 
   function loadCalib(s) {
     try {
-      const saved = JSON.parse(localStorage.getItem(CALIB_KEY) || 'null');
+      let saved = null;
+      // window.name: cross-origin, per-tab persistence
+      const m = (window.name || '').match(/__rsvp__(\{[^}]*\})/);
+      if (m) saved = JSON.parse(m[1]);
+      // localStorage: same-origin, cross-session fallback
+      if (!saved) saved = JSON.parse(localStorage.getItem('rsvp-opto-calib') || 'null');
       if (!saved) return s;
-      if (saved.stripeW  !== undefined) s.stripeW  = saved.stripeW;
+      if (saved.stripeW   !== undefined) s.stripeW   = saved.stripeW;
       if (saved.stripeOff !== undefined) s.stripeOff = saved.stripeOff;
       if (saved.red)  s.red  = saved.red;
       if (saved.cyan) s.cyan = saved.cyan;
-      if (saved.opto  !== undefined) s.opto  = saved.opto;
+      // opto intentionally not restored — URL param controls initial state
     } catch(e) {}
     return s;
   }
 
   function saveCalib(cfg) {
+    const data = { stripeW: cfg.stripeW, stripeOff: cfg.stripeOff, red: cfg.red, cyan: cfg.cyan };
     try {
-      localStorage.setItem(CALIB_KEY, JSON.stringify({
-        stripeW: cfg.stripeW, stripeOff: cfg.stripeOff,
-        red: cfg.red, cyan: cfg.cyan, opto: cfg.opto,
-      }));
+      window.name = (window.name || '').replace(/__rsvp__\{[^}]*\}/, '') + '__rsvp__' + JSON.stringify(data);
+      localStorage.setItem('rsvp-opto-calib', JSON.stringify(data));
     } catch(e) {}
   }
 
@@ -218,7 +228,7 @@
     const paragraphs = rawText.split(/\n{2,}/).map(p => p.replace(/\s+/g,' ').trim()).filter(Boolean);
     const fontSize = Math.round(18 * S.scale);
     // opto defaults to true in bar reader — user can toggle off in calibration panel
-    const cfg = { stripeW: S.stripeW, stripeOff: S.stripeOff, red: S.red, cyan: S.cyan, fg: S.fg, opto: S.opto !== false };
+    const cfg = { stripeW: S.stripeW, stripeOff: S.stripeOff, red: S.red, cyan: S.cyan, fg: S.fg, opto: S.opto };
 
     const overlay = document.createElement('div');
     overlay.id = 'bm-overlay';
