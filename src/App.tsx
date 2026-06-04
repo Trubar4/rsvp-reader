@@ -40,8 +40,15 @@ export default function App() {
   const [stripeCyan, setStripeCyan] = useState<string>(saved?.stripeCyan || '#00FFFF');
   const [playing, setPlaying] = useState(false);
 
-  const bookmarkletUrl = `${getBookmarkletBaseUrl()}?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`;
+  const optoParams = optotraining
+    ? `&opto=1&stripeW=${stripeWidth}&stripeOff=${stripeOffset}&red=${encodeURIComponent(stripeRed)}&cyan=${encodeURIComponent(stripeCyan)}`
+    : '';
+  const bookmarkletUrl = `${getBookmarkletBaseUrl()}?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&mode=${readingMode}${optoParams}`;
   const bookmarkletCode = `javascript:(function(){var s=document.createElement('script');s.src='${bookmarkletUrl}&t='+Date.now();document.body.appendChild(s)})()`;
+
+  const bookmarkletLabel = readingMode === 'bar'
+    ? `Bar Reader${optotraining ? ' + OptoTraining' : ''}`
+    : `Speed Read (${wpm} WPM)`;
 
   useEffect(() => {
     localStorage.setItem('rsvp-settings', JSON.stringify({
@@ -118,7 +125,7 @@ export default function App() {
           href={bookmarkletCode}
           onClick={(e) => { e.preventDefault(); alert('Ziehe diesen Button in deine Lesezeichen-Leiste!\n\niPhone: Nutze den "Code kopieren" Button unten.'); }}
         >
-          Speed Read ({wpm} WPM)
+          {bookmarkletLabel}
         </a>
 
         <div style={{ marginTop: 20, padding: 16, background: 'rgba(255,255,255,0.15)', borderRadius: 12 }}>
