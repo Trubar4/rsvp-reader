@@ -680,6 +680,119 @@ kbd {
   opacity: 0.85;
 }
 
+/* ===== Mode Selector + Start Row ===== */
+.mode-start-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.mode-selector {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  padding: 0 20px;
+  min-height: 52px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--bg-card);
+  color: var(--fg-muted);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  touch-action: manipulation;
+}
+
+.mode-btn:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* ===== Bar Reader ===== */
+.bar-reader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+}
+
+.bar-reader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 52px;
+}
+
+.opto-calib-btn-inline {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.bar-reader-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bar-reader-text {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 28px 60px;
+  line-height: 1.85;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.bar-reader-text p {
+  margin: 0 0 1.3em 0;
+}
+
+/* OptoTraining stripes in bar reader
+   Uses --bar-scroll for scroll compensation (iOS Safari doesn't support
+   background-attachment:fixed inside overflow containers) */
+.bar-reader.opto-active .bar-reader-text p {
+  background-image: linear-gradient(to right,
+    var(--fg)          0px                        var(--stripe-w),
+    var(--stripe-red)  var(--stripe-w)            calc(var(--stripe-w) * 2),
+    var(--fg)          calc(var(--stripe-w) * 2)  calc(var(--stripe-w) * 3),
+    var(--stripe-cyan) calc(var(--stripe-w) * 3)  calc(var(--stripe-w) * 4),
+    var(--fg)          calc(var(--stripe-w) * 4)  calc(var(--stripe-w) * 5),
+    var(--stripe-red)  calc(var(--stripe-w) * 5)  calc(var(--stripe-w) * 6),
+    var(--fg)          calc(var(--stripe-w) * 6)  calc(var(--stripe-w) * 7),
+    var(--stripe-cyan) calc(var(--stripe-w) * 7)  calc(var(--stripe-w) * 8),
+    var(--fg)          calc(var(--stripe-w) * 8)  calc(var(--stripe-w) * 9)
+  );
+  background-size: calc(var(--stripe-w) * 9) 100%;
+  background-attachment: fixed;
+  background-position: var(--stripe-offset, 0px) var(--bar-scroll, 0px);
+  background-repeat: repeat-x;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
 /* ===== Bookmarklet Page ===== */
 .bookmarklet-section {
   background: linear-gradient(135deg, var(--primary), #7209b7);

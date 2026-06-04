@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { buildChunks } from '../lib/timing';
 import FocalWord from './FocalWord';
 import ControlsBar from './ControlsBar';
+import CalibrationPanel from './CalibrationPanel';
 import { useKeyControls } from '../hooks/useKeyControls';
 
 type Token = {
@@ -96,50 +97,13 @@ export default function PlayerScreen(
       style={{ '--stripe-offset': `${stripeOffset}px`, '--stripe-w': `${stripeWidth}px`, '--stripe-red': stripeRed, '--stripe-cyan': stripeCyan } as React.CSSProperties}
     >
       {calibrating && (
-        <div className="opto-calib-panel" onClick={e => e.stopPropagation()}>
-          <h3>Kalibrierung</h3>
-          <div className="opto-calib-label">Streifenbreite: {stripeWidth} px</div>
-          <div className="opto-calib-row">
-            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.max(10, stripeWidth - 5))}>−5</button>
-            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.max(10, stripeWidth - 1))}>−1</button>
-            <input
-              type="range"
-              min={10}
-              max={300}
-              value={stripeWidth}
-              onChange={e => onStripeWidthChange(Number(e.target.value))}
-            />
-            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.min(300, stripeWidth + 1))}>+1</button>
-            <button className="opto-calib-step" onClick={() => onStripeWidthChange(Math.min(300, stripeWidth + 5))}>+5</button>
-          </div>
-          <div className="opto-calib-label">Versatz: {stripeOffset} px</div>
-          <div className="opto-calib-row">
-            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 10)}>−10</button>
-            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset - 1)}>−1</button>
-            <input
-              type="range"
-              min={-300}
-              max={300}
-              value={stripeOffset}
-              onChange={e => onStripeOffsetChange(Number(e.target.value))}
-            />
-            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 1)}>+1</button>
-            <button className="opto-calib-step" onClick={() => onStripeOffsetChange(stripeOffset + 10)}>+10</button>
-          </div>
-          <div className="opto-calib-colors">
-            <div className="opto-calib-color-item">
-              <span>Rot</span>
-              <input type="color" value={stripeRed} onChange={e => onStripeRedChange(e.target.value)} />
-              <button className="opto-calib-step" onClick={() => onStripeRedChange('#FF0000')}>Reset</button>
-            </div>
-            <div className="opto-calib-color-item">
-              <span>Cyan</span>
-              <input type="color" value={stripeCyan} onChange={e => onStripeCyanChange(e.target.value)} />
-              <button className="opto-calib-step" onClick={() => onStripeCyanChange('#00FFFF')}>Reset</button>
-            </div>
-          </div>
-          <button className="opto-calib-done" onClick={() => setCalibrating(false)}>Fertig</button>
-        </div>
+        <CalibrationPanel
+          stripeOffset={stripeOffset} onStripeOffsetChange={onStripeOffsetChange}
+          stripeWidth={stripeWidth} onStripeWidthChange={onStripeWidthChange}
+          stripeRed={stripeRed} onStripeRedChange={onStripeRedChange}
+          stripeCyan={stripeCyan} onStripeCyanChange={onStripeCyanChange}
+          onClose={() => setCalibrating(false)}
+        />
       )}
 
       {optotraining && !calibrating && (

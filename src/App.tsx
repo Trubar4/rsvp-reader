@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import TextInputPanel from './components/TextInputPanel';
 import PlayerScreen from './components/PlayerScreen';
+import BarReaderScreen from './components/BarReaderScreen';
 import SettingsPanel from './components/SettingsPanel';
 import { useTextCleaner } from './hooks/useTextCleaner';
 import { useTokenizer } from './hooks/useTokenizer';
 
 export type Language = 'de' | 'en';
+type ReadingMode = 'rsvp' | 'bar';
 
-// Lade gespeicherte Einstellungen aus localStorage
 function loadSettings() {
   try {
     const saved = localStorage.getItem('rsvp-settings');
@@ -16,11 +17,9 @@ function loadSettings() {
   return null;
 }
 
-// Generiert die korrekte Bookmarklet-URL (funktioniert auch mit Subdirectory wie /rsvp-reader/)
 function getBookmarkletBaseUrl() {
-  // Nimmt die aktuelle URL und ersetzt den Dateinamen mit bookmarklet.js
   const url = new URL('bookmarklet.js', window.location.href);
-  return url.href.split('?')[0]; // Entferne Query-Parameter falls vorhanden
+  return url.href.split('?')[0];
 }
 
 export default function App() {
@@ -33,6 +32,7 @@ export default function App() {
   const [textScale, setTextScale] = useState<number>(saved?.textScale || 1.0);
   const [fg, setFg] = useState(saved?.fg || '#1a1a2e');
   const [bg, setBg] = useState(saved?.bg || '#f8f9fa');
+  const [readingMode, setReadingMode] = useState<ReadingMode>(saved?.readingMode || 'rsvp');
   const [optotraining, setOptotraining] = useState<boolean>(saved?.optotraining || false);
   const [stripeOffset, setStripeOffset] = useState<number>(saved?.stripeOffset || 0);
   const [stripeWidth, setStripeWidth] = useState<number>(saved?.stripeWidth || 80);
@@ -40,31 +40,51 @@ export default function App() {
   const [stripeCyan, setStripeCyan] = useState<string>(saved?.stripeCyan || '#00FFFF');
   const [playing, setPlaying] = useState(false);
 
-  // Bookmarklet URL mit aktuellen Einstellungen
   const bookmarkletUrl = `${getBookmarkletBaseUrl()}?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}`;
   const bookmarkletCode = `javascript:(function(){var s=document.createElement('script');s.src='${bookmarkletUrl}&t='+Date.now();document.body.appendChild(s)})()`;
 
-  // Speichere Einstellungen bei Änderungen
   useEffect(() => {
-    localStorage.setItem('rsvp-settings', JSON.stringify({ lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan }));
-  }, [lang, wpm, chunk, textScale, fg, bg, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan]);
+    localStorage.setItem('rsvp-settings', JSON.stringify({
+      lang, wpm, chunk, textScale, fg, bg,
+      readingMode, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan,
+    }));
+  }, [lang, wpm, chunk, textScale, fg, bg, readingMode, optotraining, stripeOffset, stripeWidth, stripeRed, stripeCyan]);
 
   const cleaned = useTextCleaner(raw);
   const tokens = useTokenizer(cleaned, lang);
   const startDisabled = tokens.length === 0;
 
-  // Bookmarklet URL-Parameter auslesen
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const textParam = params.get('text');
     if (textParam) {
       setRaw(decodeURIComponent(textParam));
-      // URL-Parameter entfernen ohne Reload
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
-  if (playing) {
+  const optoProps = {
+    optotraining,
+    stripeOffset, onStripeOffsetChange: setStripeOffset,
+    stripeWidth, onStripeWidthChange: setStripeWidth,
+    stripeRed, onStripeRedChange: setStripeRed,
+    stripeCyan, onStripeCyanChange: setStripeCyan,
+  };
+
+  if (playing && readingMode === 'bar') {
+    return (
+      <BarReaderScreen
+        tokens={tokens}
+        textScale={textScale}
+        fg={fg}
+        bg={bg}
+        onExit={() => setPlaying(false)}
+        {...optoProps}
+      />
+    );
+  }
+
+  if (playing && readingMode === 'rsvp') {
     return (
       <PlayerScreen
         tokens={tokens}
@@ -74,17 +94,9 @@ export default function App() {
         textScale={textScale}
         fg={fg}
         bg={bg}
-        optotraining={optotraining}
-        stripeOffset={stripeOffset}
-        onStripeOffsetChange={setStripeOffset}
-        stripeWidth={stripeWidth}
-        onStripeWidthChange={setStripeWidth}
-        stripeRed={stripeRed}
-        onStripeRedChange={setStripeRed}
-        stripeCyan={stripeCyan}
-        onStripeCyanChange={setStripeCyan}
         onExit={() => setPlaying(false)}
         onUpdate={({ wpm, chunk }) => { setWpm(wpm); setChunk(chunk); }}
+        {...optoProps}
       />
     );
   }
@@ -109,7 +121,6 @@ export default function App() {
           Speed Read ({wpm} WPM)
         </a>
 
-        {/* iOS Anleitung */}
         <div style={{ marginTop: 20, padding: 16, background: 'rgba(255,255,255,0.15)', borderRadius: 12 }}>
           <p style={{ margin: '0 0 12px 0', fontSize: '0.9rem' }}>
             <strong>📱 iPhone/iPad:</strong>
@@ -136,7 +147,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Fallback: Text manuell eingeben */}
+      {/* Text Input */}
       <div className="card">
         <h2>Text einfügen</h2>
         <TextInputPanel value={raw} onChange={setRaw} />
@@ -156,8 +167,22 @@ export default function App() {
         />
       </div>
 
-      {/* Action Buttons */}
-      <div className="button-row">
+      {/* Mode + Start */}
+      <div className="mode-start-row">
+        <div className="mode-selector">
+          <button
+            className={`mode-btn${readingMode === 'rsvp' ? ' active' : ''}`}
+            onClick={() => setReadingMode('rsvp')}
+          >
+            RSVP
+          </button>
+          <button
+            className={`mode-btn${readingMode === 'bar' ? ' active' : ''}`}
+            onClick={() => setReadingMode('bar')}
+          >
+            Bar Reader
+          </button>
+        </div>
         <button
           className="btn btn-primary btn-lg"
           style={{ flex: 1 }}
@@ -175,7 +200,6 @@ export default function App() {
         </button>
       </div>
 
-      {/* Info */}
       <div className="info-box">
         <strong>Tipp:</strong> Nutze das Bookmarklet oben, um direkt von jeder Webseite zu lesen.
         Oder füge hier Text ein und klicke auf "Lesen starten".
