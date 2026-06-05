@@ -25,6 +25,8 @@
         if (s.indexOf('bookmarklet.js') !== -1) { src = s; break; }
       }
       if (!src) return d;
+      // iOS Safari bookmark editor HTML-encodes & → &amp; in the saved URL
+      src = src.replace(/&amp;/g, '&');
       const p = new URL(src).searchParams;
       function num(key, def) { const v = parseInt(p.get(key)); return isNaN(v) ? def : v; }
       function flt(key, def) { const v = parseFloat(p.get(key)); return isNaN(v) ? def : v; }
