@@ -10,14 +10,34 @@
   }
   window.__rsvpReaderActive = true;
 
-  // ===== Settings from script URL =====
+  // ===== Settings =====
   function getSettings() {
     const d = { wpm: 300, chunk: 1, scale: 1.0, fg: '#1a1a2e', bg: '#f8f9fa',
                 mode: 'rsvp', opto: false, stripeW: 80, stripeOff: 0,
                 red: '#FF0000', cyan: '#00FFFF' };
+
+    // Primary: JS object injected by bookmarklet wrapper as window.__rsvpP
+    // This is 100% reliable — no URL parsing, no encoding issues.
+    const p = window.__rsvpP;
+    if (p && typeof p === 'object') {
+      try { delete window.__rsvpP; } catch(e) {}
+      return {
+        wpm:       typeof p.wpm === 'number'      ? p.wpm       : d.wpm,
+        chunk:     typeof p.chunk === 'number'    ? p.chunk     : d.chunk,
+        scale:     typeof p.scale === 'number'    ? p.scale     : d.scale,
+        fg:        typeof p.fg === 'string'       ? p.fg        : d.fg,
+        bg:        typeof p.bg === 'string'       ? p.bg        : d.bg,
+        mode:      typeof p.mode === 'string'     ? p.mode      : d.mode,
+        opto:      p.opto === true,
+        stripeW:   typeof p.stripeW === 'number'  ? p.stripeW   : d.stripeW,
+        stripeOff: typeof p.stripeOff === 'number'? p.stripeOff : d.stripeOff,
+        red:       typeof p.red === 'string'      ? p.red       : d.red,
+        cyan:      typeof p.cyan === 'string'     ? p.cyan      : d.cyan,
+      };
+    }
+
+    // Fallback: parse URL params (old-format bookmarklets)
     try {
-      // Search all scripts for ours by filename — reliable across all browsers
-      // regardless of document.currentScript support for dynamic scripts
       let src = '';
       const scripts = document.getElementsByTagName('script');
       for (let i = scripts.length - 1; i >= 0; i--) {
@@ -25,20 +45,19 @@
         if (s.indexOf('bookmarklet.js') !== -1) { src = s; break; }
       }
       if (!src) return d;
-      // iOS Safari bookmark editor HTML-encodes & → &amp; in the saved URL
       src = src.replace(/&amp;/g, '&');
-      const p = new URL(src).searchParams;
-      function num(key, def) { const v = parseInt(p.get(key)); return isNaN(v) ? def : v; }
-      function flt(key, def) { const v = parseFloat(p.get(key)); return isNaN(v) ? def : v; }
-      function col(key, def) { const v = p.get(key); return v ? decodeURIComponent(v) : def; }
+      const q = new URL(src).searchParams;
+      function num(key, def) { const v = parseInt(q.get(key)); return isNaN(v) ? def : v; }
+      function flt(key, def) { const v = parseFloat(q.get(key)); return isNaN(v) ? def : v; }
+      function col(key, def) { const v = q.get(key); return v ? decodeURIComponent(v) : def; }
       return {
         wpm:       num('wpm',       d.wpm),
         chunk:     num('chunk',     d.chunk),
         scale:     flt('scale',     d.scale),
         fg:        col('fg',        d.fg),
         bg:        col('bg',        d.bg),
-        mode:      p.get('mode') || d.mode,
-        opto:      p.get('opto') === '1',
+        mode:      q.get('mode') || d.mode,
+        opto:      q.get('opto') === '1',
         stripeW:   num('stripeW',   d.stripeW),
         stripeOff: num('stripeOff', d.stripeOff),
         red:       col('red',       d.red),

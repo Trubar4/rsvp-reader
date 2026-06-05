@@ -40,11 +40,19 @@ export default function App() {
   const [stripeCyan, setStripeCyan] = useState<string>(saved?.stripeCyan || '#00FFFF');
   const [playing, setPlaying] = useState(false);
 
-  const optoParams = optotraining
-    ? `&opto=1&stripeW=${stripeWidth}&stripeOff=${stripeOffset}&red=${encodeURIComponent(stripeRed)}&cyan=${encodeURIComponent(stripeCyan)}`
-    : '';
-  const bookmarkletUrl = `${getBookmarkletBaseUrl()}?wpm=${wpm}&chunk=${chunk}&scale=${textScale}&fg=${encodeURIComponent(fg)}&bg=${encodeURIComponent(bg)}&mode=${readingMode}${optoParams}`;
-  const bookmarkletCode = `javascript:(function(){var s=document.createElement('script');s.src='${bookmarkletUrl}&t='+Date.now();document.body.appendChild(s)})()`;
+  // Build params as a JS object literal embedded directly in the bookmarklet —
+  // avoids all URL-parsing and iOS Safari &amp; encoding issues.
+  function esc(s: string) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+  const bmParts = [
+    `wpm:${wpm}`, `chunk:${chunk}`, `scale:${textScale}`,
+    `fg:'${esc(fg)}'`, `bg:'${esc(bg)}'`, `mode:'${readingMode}'`,
+  ];
+  if (optotraining) bmParts.push(
+    `opto:true`, `stripeW:${stripeWidth}`, `stripeOff:${stripeOffset}`,
+    `red:'${esc(stripeRed)}'`, `cyan:'${esc(stripeCyan)}'`,
+  );
+  const bmParams = `{${bmParts.join(',')}}`;
+  const bookmarkletCode = `javascript:(function(){window.__rsvpP=${bmParams};var s=document.createElement('script');s.src='${getBookmarkletBaseUrl()}?t='+Date.now();document.body.appendChild(s)})()`;
 
   const bookmarkletLabel = readingMode === 'bar'
     ? `Bar Reader${optotraining ? ' + OptoTraining' : ''}`
